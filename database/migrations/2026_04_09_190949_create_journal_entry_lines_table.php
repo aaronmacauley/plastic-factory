@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->uuid('journal_entry_id');
             $table->foreign('journal_entry_id')
                 ->references('id')
-                ->on('journal_entries')
+                ->on('journals')
                 ->cascadeOnDelete();
 
             $table->uuid('account_id');

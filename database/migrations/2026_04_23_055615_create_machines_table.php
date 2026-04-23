@@ -10,18 +10,13 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('income_categories', function (Blueprint $table) {
+        Schema::create('machines', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('code')->unique(); // SAL, SERV
-            $table->string('name'); // Sales, Service Income
-            $table->uuid('account_id');
-            $table->foreign('account_id')
-                ->references('id')
-                ->on('accounts')
-                ->restrictOnDelete();
+            $table->decimal('cost_per_hour', 15, 2)->default(0);
+
+            $table->string('machine_name');
             $table->timestamps();
         });
-
     }
 
     /**
@@ -29,6 +24,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('income_categories');
+        Schema::dropIfExists('machines');
     }
 };

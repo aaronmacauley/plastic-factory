@@ -10,7 +10,7 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('journal_entries', function (Blueprint $table) {
+        Schema::create('journals', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('journal_number')->unique();
             $table->date('transaction_date');

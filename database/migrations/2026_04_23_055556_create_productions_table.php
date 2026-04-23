@@ -10,8 +10,12 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('stock_movements', function (Blueprint $table) {
+        Schema::create('productions', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->date('production_date');
+            $table->decimal('total_material_cost', 15, 2)->default(0);
+            $table->decimal('total_machine_cost', 15, 2)->default(0);
+            $table->decimal('total_cost', 15, 2)->default(0);
 
 
             $table->uuid('item_id');
@@ -20,26 +24,19 @@ return new class extends Migration {
                 ->on('items')
                 ->cascadeOnDelete();
 
-            $table->enum('type', ['in', 'out']);
+            $table->uuid('journal_id')->nullable();
 
-            $table->decimal('qty', 15, 4);
-            $table->decimal('price', 15, 2)->default(0);
-
-            // link ke journal
-            $table->uuid('journal_entry_id')->nullable();
-            $table->foreign('journal_entry_id')
+            $table->foreign('journal_id')
                 ->references('id')
                 ->on('journals')
                 ->nullOnDelete();
 
-            $table->string('reference_type')->nullable();
-            $table->unsignedBigInteger('reference_id')->nullable();
 
-            $table->date('transaction_date');
-
+            $table->string('operator_name')->nullable();
+            $table->text('notes')->nullable();
+            $table->decimal('total_output', 10, 2)->default(0);
             $table->timestamps();
         });
-
     }
 
     /**
@@ -47,6 +44,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('stock_movements');
+        Schema::dropIfExists('productions');
     }
 };
