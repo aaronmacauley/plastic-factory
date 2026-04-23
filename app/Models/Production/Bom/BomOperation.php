@@ -4,22 +4,24 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Str;
 
-class ItemUnit extends Model
+class BomOperation extends Model
 {
     use HasFactory;
 
-    protected $table = 'item_unit';
+    protected $table = 'bom_operations';
 
     protected $keyType = 'string';
     public $incrementing = false;
 
     protected $fillable = [
         'id',
-        'item_id',
-        'unit_id',
-        'conversion_rate',
-        'is_base_unit'
+        'bom_id',
+        'machine_id',
+        'sequence',
+        'hours',
+        'cost_per_hour'
     ];
 
     protected static function boot()
@@ -33,13 +35,15 @@ class ItemUnit extends Model
         });
     }
 
-    public function item()
+    // 🔗 ke BOM
+    public function bom()
     {
-        return $this->belongsTo(Item::class);
+        return $this->belongsTo(Bom::class);
     }
 
-    public function unit()
+    // 🔗 ke Machine
+    public function machine()
     {
-        return $this->belongsTo(Unit::class);
+        return $this->belongsTo(Machine::class);
     }
 }

@@ -10,26 +10,26 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('production_materials', function (Blueprint $table) {
+        Schema::create('bom_details', function (Blueprint $table) {
             $table->uuid('id')->primary();
 
-
-            $table->uuid('production_id');
-            $table->foreign('production_id')
+            $table->uuid('bom_id');
+            $table->foreign('bom_id')
                 ->references('id')
-                ->on('productions')
+                ->on('boms')
                 ->cascadeOnDelete();
 
-            $table->uuid('material_id');
-            $table->foreign('material_id')
+            $table->uuid('item_id'); // bahan / sub-assembly
+            $table->foreign('item_id')
                 ->references('id')
-                ->on('materials')
+                ->on('items')
                 ->cascadeOnDelete();
 
-            $table->decimal('qty', 15, 2);
-            $table->decimal('cost', 15, 2); // qty * cost_per_unit
+            $table->decimal('qty', 15, 4);
 
             $table->timestamps();
+
+            $table->unique(['bom_id', 'item_id']);
         });
     }
 
@@ -38,6 +38,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('production_materials');
+        Schema::dropIfExists('bom_details');
     }
 };

@@ -5,11 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ItemUnit extends Model
+class Bom extends Model
 {
     use HasFactory;
-
-    protected $table = 'item_unit';
+    protected $table = 'boms';
 
     protected $keyType = 'string';
     public $incrementing = false;
@@ -17,9 +16,9 @@ class ItemUnit extends Model
     protected $fillable = [
         'id',
         'item_id',
-        'unit_id',
-        'conversion_rate',
-        'is_base_unit'
+        'version',
+        'is_active',
+        'notes'
     ];
 
     protected static function boot()
@@ -33,13 +32,21 @@ class ItemUnit extends Model
         });
     }
 
+    // 🔗 Relasi ke item (produk utama)
     public function item()
     {
         return $this->belongsTo(Item::class);
     }
 
-    public function unit()
+    // 🔗 Relasi ke detail (komponen)
+    public function details()
     {
-        return $this->belongsTo(Unit::class);
+        return $this->hasMany(BomDetail::class);
+    }
+
+    // 🔗 Relasi ke operation (mesin)
+    public function operations()
+    {
+        return $this->hasMany(BomOperation::class);
     }
 }

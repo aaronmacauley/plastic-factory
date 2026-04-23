@@ -37,9 +37,21 @@ class Item extends Model
         });
     }
 
-    public function unit()
+    public function boms()
     {
-        return $this->belongsTo(Unit::class);
+        return $this->hasMany(Bom::class);
+    }
+
+    // BOM aktif (helper)
+    public function activeBom()
+    {
+        return $this->hasOne(Bom::class)->where('is_active', true);
+    }
+    public function units()
+    {
+        return $this->belongsToMany(Unit::class, 'item_unit')
+            ->withPivot('conversion_rate', 'is_base_unit')
+            ->withTimestamps();
     }
 
     public function stock()
@@ -49,6 +61,6 @@ class Item extends Model
 
     public function productions()
     {
-        return $this->hasMany(Production::class);
+        return $this->hasMany(Productions::class);
     }
 }

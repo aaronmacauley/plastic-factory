@@ -4,12 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Str;
 
-class Unit extends Model
+class Item extends Model
 {
-
-    protected $table = 'units';
+    protected $table = 'items';
 
     protected $keyType = 'string';
     public $incrementing = false;
@@ -18,11 +16,16 @@ class Unit extends Model
         'id',
         'code',
         'name',
+        'unit_id',
+        'size',
+        'grade',
+        'weight',
+        'diameter',
+        'standard_cost',
+        'price',
+        'is_active'
     ];
 
-    /**
-     * Auto generate UUID
-     */
     protected static function boot()
     {
         parent::boot();
@@ -33,15 +36,19 @@ class Unit extends Model
             }
         });
     }
-
-    /**
-     * 🔗 Relationship (optional, but recommended)
-     * One unit can be used by many items
-     */
-    public function items()
+    public function units()
     {
-        return $this->belongsToMany(Item::class, 'item_unit')
+        return $this->belongsToMany(Unit::class, 'item_unit')
             ->withPivot('conversion_rate', 'is_base_unit')
             ->withTimestamps();
+    }
+    public function stock()
+    {
+        return $this->hasOne(Stock::class);
+    }
+
+    public function productions()
+    {
+        return $this->hasMany(Productions::class);
     }
 }

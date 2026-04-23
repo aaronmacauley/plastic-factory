@@ -21,16 +21,14 @@ return new class extends Migration {
             $table->string('grade')->nullable();       // P / M
             $table->decimal('weight', 10, 2)->nullable();
             $table->decimal('diameter', 10, 2)->nullable();
-            $table->foreign('unit_id')
-                ->references('id')
-                ->on('units')
-                ->nullOnDelete();
+
             $table->decimal('standard_cost', 15, 2)->default(0);
 
 
             $table->decimal('price', 15, 2)->default(0);
 
             $table->boolean('is_active')->default(true);
+            $table->enum('type', ['raw', 'wip', 'finished'])->default('raw');
 
             $table->timestamps();
         });

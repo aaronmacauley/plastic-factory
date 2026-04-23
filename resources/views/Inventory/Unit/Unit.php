@@ -4,20 +4,25 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Str;
 
-class Materials extends Model
+class Unit extends Model
 {
-    protected $table = 'materials';
+
+    protected $table = 'units';
 
     protected $keyType = 'string';
     public $incrementing = false;
 
     protected $fillable = [
-
+        'id',
+        'code',
         'name',
-        'cost_per_unit'
     ];
 
+    /**
+     * Auto generate UUID
+     */
     protected static function boot()
     {
         parent::boot();
@@ -29,8 +34,14 @@ class Materials extends Model
         });
     }
 
-    public function productions()
+    /**
+     * 🔗 Relationship (optional, but recommended)
+     * One unit can be used by many items
+     */
+    public function items()
     {
-        return $this->hasMany(ProductionMaterial::class);
+        return $this->belongsToMany(Item::class, 'item_unit')
+            ->withPivot('conversion_rate', 'is_base_unit')
+            ->withTimestamps();
     }
 }
