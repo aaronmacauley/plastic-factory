@@ -2,6 +2,10 @@
 
 namespace App\Models\Inventory\Item;
 
+use App\Models\Inventory\Stock\Master\Stock;
+use App\Models\Inventory\Unit\Unit;
+use App\Models\Production\Bom;
+use App\Models\Production\Master\Productions;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;

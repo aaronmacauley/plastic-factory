@@ -2,6 +2,10 @@
 
 namespace App\Services\Inventory\Item;
 
+use App\Models\Inventory\Item\Item;
+use App\Models\Inventory\ItemUnit\ItemUnit;
+use DB;
+
 class ItemService
 {
     protected $model;

@@ -20,6 +20,7 @@ use App\Http\Controllers\Inventory\Unit\UnitController;
 
 Route::prefix('inventory/units')->name('units.')->group(function () {
     Route::get('/', [UnitController::class, 'index'])->name('index');
+
     Route::post('/', [UnitController::class, 'store'])->name('store');
     Route::get('/{id}/edit', [UnitController::class, 'edit'])->name('edit');
     Route::put('/{id}', [UnitController::class, 'update'])->name('update');
@@ -28,6 +29,7 @@ Route::prefix('inventory/units')->name('units.')->group(function () {
 
 Route::prefix('inventory/items')->name('items.')->group(function () {
     Route::get('/', [ItemController::class, 'index'])->name('index');
+    Route::get('/create', [ItemController::class, 'create'])->name('create');
     Route::post('/', [ItemController::class, 'store'])->name('store');
     Route::put('/{id}', [ItemController::class, 'update'])->name('update');
     Route::delete('/{id}', [ItemController::class, 'destroy'])->name('destroy');

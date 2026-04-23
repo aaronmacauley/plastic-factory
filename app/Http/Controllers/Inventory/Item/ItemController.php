@@ -4,22 +4,27 @@ namespace App\Http\Controllers\Inventory\Item;
 
 use App\Http\Controllers\Controller;
 use App\Services\Inventory\Item\ItemService;
+use App\Services\Inventory\Unit\UnitService;
 use Illuminate\Http\Request;
 
 class ItemController extends Controller
 {
 
     protected $service;
+    protected $unitService;
 
-    public function __construct(ItemService $service)
+    public function __construct(ItemService $service, UnitService $UnitService)
     {
         $this->service = $service;
+        $this->unitService = $UnitService;
     }
+
+
 
     public function index()
     {
         $items = $this->service->getAll();
-        $units = Unit::all();
+        $units = $this->unitService->getAll();
 
         return view('inventory.items.index', compact('items', 'units'));
     }
@@ -36,6 +41,12 @@ class ItemController extends Controller
 
         return redirect()->back()->with('success', 'Item created successfully');
     }
+    public function create()
+    {
+        return view('inventory.items.create');
+    }
+
+
 
     public function update(Request $request, $id)
     {
