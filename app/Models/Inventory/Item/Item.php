@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Inventory\Item;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Item extends Model
 {
@@ -16,7 +17,6 @@ class Item extends Model
         'id',
         'code',
         'name',
-        'unit_id',
         'size',
         'grade',
         'weight',
@@ -25,6 +25,7 @@ class Item extends Model
         'price',
         'is_active'
     ];
+
 
     protected static function boot()
     {

@@ -5,5 +5,12 @@
 <script src="{{URL::asset('assets/libs/simplebar/simplebar.min.js')}}"></script>
 <script src="{{URL::asset('assets/libs/node-waves/node-waves.min.js')}}"></script>
 
+<!-- SweetAlert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Global Swal Helper -->
+<script src="{{ asset('assets/js/swal.js') }}"></script>
+
+
 <!-- onother scripts -->
-@yield('scripts') 
+@yield('scripts')

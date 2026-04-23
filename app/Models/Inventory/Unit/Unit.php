@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Inventory\Unit;
 
+use App\Models\Inventory\Item\Item;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Str;
+use Illuminate\Support\Str;
 
 class Unit extends Model
 {

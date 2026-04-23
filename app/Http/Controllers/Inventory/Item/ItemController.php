@@ -1,65 +1,59 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Inventory\Item;
 
 use App\Http\Controllers\Controller;
+use App\Services\Inventory\Item\ItemService;
 use Illuminate\Http\Request;
 
 class ItemController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
+    protected $service;
+
+    public function __construct(ItemService $service)
+    {
+        $this->service = $service;
+    }
+
     public function index()
     {
-        //
+        $items = $this->service->getAll();
+        $units = Unit::all();
+
+        return view('inventory.items.index', compact('items', 'units'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'code' => 'required',
+            'name' => 'required',
+            'unit_id' => 'required'
+        ]);
+
+        $this->service->store($request->all());
+
+        return redirect()->back()->with('success', 'Item created successfully');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function update(Request $request, $id)
     {
-        //
+        $request->validate([
+            'code' => 'required',
+            'name' => 'required',
+            'unit_id' => 'required'
+        ]);
+
+        $this->service->update($id, $request->all());
+
+        return redirect()->back()->with('success', 'Item updated successfully');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function destroy($id)
     {
-        //
-    }
+        $this->service->delete($id);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return redirect()->back()->with('success', 'Item deleted');
     }
 }

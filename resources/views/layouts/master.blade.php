@@ -43,8 +43,6 @@
     </div>
     <!-- END wrapper -->
 
-    <!-- right sidebar file here  -->
-    @include('layouts.right-sidebar')
     <!-- script file here -->
     @include('layouts.vendor-scripts')
     </body>
