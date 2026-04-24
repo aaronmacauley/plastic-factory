@@ -1,90 +1,154 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Production\Master;
 
 use App\Models\Production\Bom\Bom;
 use App\Models\Production\Machine\ProductionDetails;
 use App\Models\Production\Master\ProductionMaterial;
 use App\Models\Production\Master\Productions;
+use App\Services\Accounting\Journal\JournalService;
+use Illuminate\Support\Str;
 use DB;
 
 class ProductionService
 {
-    public function getAll()
+    protected $journalService;
+
+    public function __construct(JournalService $journalService)
     {
-        return Productions::with(['item','bom'])->latest()->get();
+        $this->journalService = $journalService;
     }
 
+    // ================= CREATE =================
     public function store($data)
     {
-        DB::beginTransaction();
+        return DB::transaction(function () use ($data) {
 
-        try {
+            $bom = Bom::with(['details.item','operations.machine'])
+                ->findOrFail($data['bom_id']);
+
             $production = Productions::create([
+                'id' => Str::uuid(),
+                'production_date' => now(),
                 'item_id' => $data['item_id'],
-                'bom_id' => $data['bom_id'],
-                'qty' => $data['qty'],
-                'status' => 0
+                'operator_name' => $data['operator_name'] ?? null,
+                'total_output' => $data['qty'] ?? 1
             ]);
 
-            $bom = Bom::with(['details','operations'])->findOrFail($data['bom_id']);
-
-            // 👉 MATERIAL AUTO GENERATE
+            // 🔥 generate material & operation (draft)
             foreach ($bom->details as $d) {
                 ProductionMaterial::create([
+                    'id' => Str::uuid(),
                     'production_id' => $production->id,
                     'item_id' => $d->item_id,
-                    'bom_id' => $bom->id,
                     'qty' => $d->qty * $data['qty'],
-                    'cost' => 0
+                    'unit_cost' => $d->item->standard_cost,
+                    'cost' => 0 // belum dihitung
                 ]);
             }
 
-            // 👉 OPERATION AUTO GENERATE
             foreach ($bom->operations as $o) {
                 ProductionDetails::create([
+                    'id' => Str::uuid(),
                     'production_id' => $production->id,
                     'machine_id' => $o->machine_id,
                     'hours' => $o->hours,
-                    'cost' => $o->hours * $o->cost_per_hour
+                    'cost' => 0 // belum dihitung
                 ]);
             }
 
-            DB::commit();
             return $production;
-
-        } catch (\Exception $e) {
-            DB::rollback();
-            throw $e;
-        }
+        });
     }
 
+    // ================= START =================
     public function start($id)
     {
         $prod = Productions::findOrFail($id);
-        $prod->update(['status' => 1]);
+
+        $prod->update([
+            'status' => 1 // in progress
+        ]);
+
         return $prod;
     }
 
+    // ================= FINISH =================
     public function finish($id)
     {
-        DB::beginTransaction();
+        return DB::transaction(function () use ($id) {
 
-        try {
-            $prod = Productions::findOrFail($id);
+            $prod = Productions::with(['materials.item','details.machine'])
+                ->findOrFail($id);
 
-            // 👉 nanti disini:
-            // - reduce stock bahan
-            // - add stock hasil
+            $totalMaterial = 0;
+            $totalMachine = 0;
 
-            $prod->update(['status' => 2]);
+            // 🔥 HITUNG MATERIAL COST REAL
+            foreach ($prod->materials as $m) {
 
-            DB::commit();
+                $cost = $m->qty * $m->unit_cost;
+
+                $m->update([
+                    'cost' => $cost
+                ]);
+
+                $totalMaterial += $cost;
+            }
+
+            // 🔥 HITUNG MACHINE COST REAL
+            foreach ($prod->details as $d) {
+
+                $machineCost = $d->machine->cost_per_hour ?? 0;
+                $cost = $d->hours * $machineCost;
+
+                $d->update([
+                    'cost' => $cost
+                ]);
+
+                $totalMachine += $cost;
+            }
+
+            $total = $totalMaterial + $totalMachine;
+
+            // 🔥 UPDATE PRODUCTION
+            $prod->update([
+                'total_material_cost' => $totalMaterial,
+                'total_machine_cost' => $totalMachine,
+                'total_cost' => $total,
+                'status' => 2 // finished
+            ]);
+
+            // 🔥 POST JOURNAL (BARU DI FINISH!)
+            $journal = $this->journalService->create([
+                'date' => now(),
+                'description' => 'Production Finish',
+                'ref_type' => 'production',
+                'ref_id' => $prod->id,
+                'lines' => [
+                    [
+                        'account_id' => 'WIP_ACCOUNT_ID',
+                        'position' => 'debit',
+                        'amount' => $total
+                    ],
+                    [
+                        'account_id' => 'RAW_MATERIAL_ACCOUNT_ID',
+                        'position' => 'credit',
+                        'amount' => $totalMaterial
+                    ],
+                    [
+                        'account_id' => 'MACHINE_COST_ACCOUNT_ID',
+                        'position' => 'credit',
+                        'amount' => $totalMachine
+                    ]
+                ]
+            ]);
+
+            $prod->update([
+                'journal_id' => $journal->id
+            ]);
+
             return $prod;
-
-        } catch (\Exception $e) {
-            DB::rollback();
-            throw $e;
-        }
+        });
     }
 }

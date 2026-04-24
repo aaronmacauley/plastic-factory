@@ -1,11 +1,11 @@
 <?php
 
+use App\Http\Controllers\Production\Master\ProductionController;
 use App\Http\Controllers\Accounting\Account\AccountController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Inventory\Item\ItemController;
 use App\Http\Controllers\Production\Bom\BomController;
 use App\Http\Controllers\Production\Machine\MachineController;
-use App\Http\Controllers\ProductionController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -61,40 +61,41 @@ Route::prefix('machines')->name('machines.')->group(function () {
 
 });
 
+Route::prefix('bom')->name('bom.')->group(function () {
+
+    Route::get('/', [BomController::class, 'index'])->name('index');
+    Route::get('/create', [BomController::class, 'create'])->name('create');
+    Route::post('/', [BomController::class, 'store'])->name('store');
+
+    // 🔥 WAJIB buat modal
+    Route::get('/{id}', [BomController::class, 'show'])->name('show');
+
+    // 🔥 buat edit dari modal
+    Route::put('/{id}', [BomController::class, 'update'])->name('update');
+
+    // 🔥 delete
+    Route::delete('/{id}', [BomController::class, 'destroy'])->name('destroy');
+});
 Route::put('/production/bom/{id}', [BomController::class, 'update']);
+Route::get('/bom/{id}', [ProductionController::class, 'getBom']);
+Route::get('/production/get-bom-by-item/{id}', [ProductionController::class, 'getBomByItem']);
 
-Route::prefix('production')->group(function () {
+Route::prefix('production')->name('production.')->group(function () {
 
-    // MACHINE
-
-    Route::prefix('bom')->name('bom.')->group(function () {
-
-        Route::get('/', [BomController::class, 'index'])->name('index');
-        Route::get('/create', [BomController::class, 'create'])->name('create');
-        Route::post('/', [BomController::class, 'store'])->name('store');
-
-        // 🔥 WAJIB buat modal
-        Route::get('/{id}', [BomController::class, 'show'])->name('show');
-
-        // 🔥 buat edit dari modal
-        Route::put('/{id}', [BomController::class, 'update'])->name('update');
-
-        // 🔥 delete
-        Route::delete('/{id}', [BomController::class, 'destroy'])->name('destroy');
-    });
+    Route::get('/', [ProductionController::class, 'index'])->name('index');
 
     // ================= PRODUCTION =================
-    Route::prefix('list')->name('production.')->group(function () {
-        Route::get('/', [ProductionController::class, 'index'])->name('index');
-    });
+    Route::get('/create', [ProductionController::class, 'create'])->name('create');
+    Route::post('/store', [ProductionController::class, 'store'])->name('store');
 
-    Route::prefix('create')->group(function () {
-        Route::get('/', [ProductionController::class, 'create'])->name('production.create');
-        Route::post('/', [ProductionController::class, 'store'])->name('production.store');
-    });
+    Route::get('/bom/{id}', [ProductionController::class, 'getBom']); // API
 
-    Route::post('{id}/start', [ProductionController::class, 'start']);
-    Route::post('{id}/finish', [ProductionController::class, 'finish']);
+    Route::post('/{id}/start', [ProductionController::class, 'start'])->name('start');
+    Route::post('/{id}/finish', [ProductionController::class, 'finish'])->name('finish');
+
+
+
+
 });
 
 
