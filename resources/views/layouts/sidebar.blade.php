@@ -23,11 +23,22 @@
                         <i class="ti-package"></i>
                         <span>Items</span>
                     </a>
+
                     <ul class="sub-menu">
-                        <li><a href="/items">List Items</a></li>
-                        <li><a href="/items/create">Create Item</a></li>
+                        <li>
+                            <a href="{{ route('items.index') }}">
+                                List Items
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{{ route('items.create') }}">
+                                Create Item
+                            </a>
+                        </li>
                     </ul>
                 </li>
+
 
                 <!-- UNITS -->
                 <li>
@@ -38,17 +49,6 @@
                 </li>
 
 
-                <!-- ITEM CONVERSION -->
-                <li>
-                    <a href="#" class="has-arrow waves-effect">
-                        <i class="ti-exchange-vertical"></i>
-                        <span>Item Conversion</span>
-                    </a>
-                    <ul class="sub-menu">
-                        <li><a href="/item-units">List Conversion</a></li>
-                        <li><a href="/item-units/create">Create Conversion</a></li>
-                    </ul>
-                </li>
 
                 <!-- STOCK -->
                 <li>
@@ -76,15 +76,14 @@
                 <!-- PRODUCTION -->
                 <li class="menu-title">Production</li>
 
-                <!-- BOM -->
                 <li>
                     <a href="#" class="has-arrow waves-effect">
                         <i class="ti-layers"></i>
                         <span>Bill of Materials</span>
                     </a>
                     <ul class="sub-menu">
-                        <li><a href="/boms">BOM List</a></li>
-                        <li><a href="/boms/create">Create BOM</a></li>
+                        <li><a href="{{ route('bom.index') }}">BOM List</a></li>
+                        <li><a href="{{ route('bom.create') }}">Create BOM</a></li>
                     </ul>
                 </li>
 
@@ -95,24 +94,32 @@
                         <span>Production</span>
                     </a>
                     <ul class="sub-menu">
-                        <li><a href="/productions">Production List</a></li>
-                        <li><a href="/productions/create">Start Production</a></li>
+                        <li><a href="{{ route('production.index') }}">Production List</a></li>
+                        <li><a href="{{ route('production.create') }}">Start Production</a></li>
                     </ul>
                 </li>
+
+                <!-- MACHINE -->
+                <li>
+                    <a href="{{ route('machines.index') }}" class="waves-effect">
+                        <i class="ti-settings"></i>
+                        <span>Machines</span>
+                    </a>
+                </li>
+                </li>
+
 
                 <!-- ACCOUNTING -->
                 <li class="menu-title">Accounting</li>
 
                 <li>
-                    <a href="#" class="has-arrow waves-effect">
+                    <a href="{{ route('accounts.index') }}" class="waves-effect">
                         <i class="ti-wallet"></i>
-                        <span>Accounts</span>
+                        <span>Chart of Accounts</span>
                     </a>
-                    <ul class="sub-menu">
-                        <li><a href="/accounts">Chart of Accounts</a></li>
-                        <li><a href="/accounts/create">Create Account</a></li>
-                    </ul>
                 </li>
+
+
 
                 <li>
                     <a href="#" class="has-arrow waves-effect">

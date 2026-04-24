@@ -1,9 +1,12 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Accounting\Account;
 
+use App\Models\Accounting\Journal\JournalDetails;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
+
 
 class Account extends Model
 {
@@ -45,6 +48,6 @@ class Account extends Model
 
     public function journalLines()
     {
-        return $this->hasMany(JournalEntryLine::class);
+        return $this->hasMany(JournalDetails::class);
     }
 }

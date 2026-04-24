@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Models\Production;
+namespace App\Models\Production\Bom;
 
 use App\Models\Inventory\Item\Item;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Support\Str;
 class BomDetails extends Model
 {
     use HasFactory;

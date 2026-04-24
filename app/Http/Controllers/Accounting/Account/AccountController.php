@@ -1,65 +1,57 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Accounting\Account;
 
 use App\Http\Controllers\Controller;
+use App\Services\Accounting\Accounts\AccountService;
 use Illuminate\Http\Request;
 
 class AccountController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    protected $service;
+
+    public function __construct(AccountService $service)
+    {
+        $this->service = $service;
+    }
+
     public function index()
     {
-        //
+        $accounts = $this->service->getAll();
+
+        return view('accounting.accounts.index', compact('accounts'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'code' => 'required|unique:accounts,code',
+            'name' => 'required',
+            'type' => 'required'
+        ]);
+
+        $this->service->store($request->all());
+
+        return redirect()->back()->with('success', 'Account created');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function update(Request $request, $id)
     {
-        //
+        $request->validate([
+            'code' => 'required',
+            'name' => 'required',
+            'type' => 'required'
+        ]);
+
+        $this->service->update($id, $request->all());
+
+        return redirect()->back()->with('success', 'Account updated');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function destroy($id)
     {
-        //
-    }
+        $this->service->delete($id);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return redirect()->back()->with('success', 'Account deleted');
     }
 }

@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Models\Production;
+namespace App\Models\Production\Bom;
 
+use App\Models\Inventory\Item\Item;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Support\Str;
 class Bom extends Model
 {
     use HasFactory;
@@ -41,7 +42,7 @@ class Bom extends Model
     // 🔗 Relasi ke detail (komponen)
     public function details()
     {
-        return $this->hasMany(BomDetail::class);
+        return $this->hasMany(BomDetails::class);
     }
 
     // 🔗 Relasi ke operation (mesin)

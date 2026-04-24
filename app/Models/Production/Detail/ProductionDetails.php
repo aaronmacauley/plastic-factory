@@ -4,7 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+namespace App\Models\Production\Machine;
+use Illuminate\Support\Str;
 
+use Illuminate\Database\Eloquent\Model;
 class ProductionDetails extends Model
 {
     protected $table = 'production_details';

@@ -7,59 +7,45 @@ use Illuminate\Http\Request;
 
 class ProductionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    protected $service;
+
+    public function __construct(ProductionService $service)
+    {
+        $this->service = $service;
+    }
+
     public function index()
     {
-        //
+        $productions = $this->service->getAll();
+        return view('production.index', compact('productions'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        $items = Item::all();
+        $boms = Bom::where('is_active', 1)->get();
+
+        return view('production.create', compact('items', 'boms'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $this->service->store($request->all());
+
+        return redirect()->route('production.index')
+            ->with('success', 'Production created');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function start($id)
     {
-        //
+        $this->service->start($id);
+        return back()->with('success', 'Production started');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function finish($id)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        $this->service->finish($id);
+        return back()->with('success', 'Production finished');
     }
 }
+

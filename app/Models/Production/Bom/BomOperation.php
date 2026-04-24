@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Models\Production;
+namespace App\Models\Production\Bom;
 
+use App\Models\Production\Machine\Machine;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Str;
+use Illuminate\Support\Str;
 
 class BomOperation extends Model
 {

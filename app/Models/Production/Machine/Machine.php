@@ -4,9 +4,13 @@ namespace App\Models\Production\Machine;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
+
 
 class Machine extends Model
 {
+    use HasFactory;
+
     protected $table = 'machines';
 
     protected $keyType = 'string';
@@ -14,7 +18,8 @@ class Machine extends Model
 
     protected $fillable = [
         'id',
-        'machine_name',
+        'name',
+        'code',
         'cost_per_hour'
     ];
 

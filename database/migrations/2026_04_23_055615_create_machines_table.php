@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->uuid('id')->primary();
             $table->decimal('cost_per_hour', 15, 2)->default(0);
 
-            $table->string('machine_name');
+            $table->string('name');
             $table->timestamps();
         });
     }

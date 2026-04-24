@@ -14,7 +14,17 @@ Items
         vertical-align: middle;
     }
 
+
+    ul {
+        text-align: left;
+    }
+
+    ul li {
+        line-height: 1.6;
+    }
+
 </style>
+
 @endsection
 
 @section('body')
@@ -55,6 +65,8 @@ Items
                                         <th>Grade</th>
                                         <th>Weight</th>
                                         <th>Price</th>
+                                        <th>Units</th>
+
                                         <th width="140">Action</th>
                                     </tr>
                                 </thead>
@@ -80,8 +92,30 @@ Items
                                         <td>
                                             Rp {{ number_format($item->price, 0, ',', '.') }}
                                         </td>
+                                        <td class="text-start">
+                                            @if($item->units->count())
+                                            <ul class="mb-0 ps-3">
+                                                @foreach($item->units as $unit)
+                                                <li class="small">
+                                                    {{ $unit->name }}
+                                                    @if($unit->pivot->is_base_unit)
+                                                    {{ $unit->pivot->conversion_rate }} <span class="badge bg-success ms-1">Base</span>
+                                                    @else
+                                                    = {{ $unit->pivot->conversion_rate }} {{ $item->units->where('pivot.is_base_unit', true)->first()->name ?? '' }}
+                                                    @endif
+                                                </li>
+                                                @endforeach
+                                            </ul>
+                                            @else
+                                            <span class="text-muted">No Unit</span>
+                                            @endif
+                                        </td>
 
                                         <td>
+                                            <button class="btn btn-info btn-sm me-1" onclick="openAddUnit('{{ $item->id }}')">
+                                                <i class="ti-plus"></i> Unit
+                                            </button>
+
                                             <button class="btn btn-warning btn-sm me-1" onclick="openEditModal(
                                                 '{{ $item->id }}',
                                                 '{{ $item->code }}',
@@ -102,6 +136,7 @@ Items
                                                 @csrf
                                                 @method('DELETE')
                                             </form>
+
                                         </td>
                                     </tr>
                                     @empty
@@ -193,6 +228,96 @@ Items
 
     @section('scripts')
     <script>
+        function openAddUnit(itemId) {
+
+            let units = @json($units);
+
+            let options = `<option value="">Select Unit</option>`;
+            units.forEach(u => {
+                options += `<option value="${u.id}">${u.name}</option>`;
+            });
+
+            Swal.fire({
+                title: 'Add Unit Conversion'
+                , html: `
+        <div class="text-start">
+
+            <label class="form-label">Unit</label>
+            <select id="swal_unit" class="form-select mb-3">
+                ${options}
+            </select>
+
+            <label class="form-label">Conversion Rate</label>
+            <input id="swal_rate" type="number" step="0.0001"
+                   class="form-control mb-3" value="1">
+
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="swal_base">
+                <label class="form-check-label">Set as Base Unit</label>
+            </div>
+
+        </div>
+    `
+                , showCancelButton: true
+                , confirmButtonText: 'Save'
+                , preConfirm: () => {
+                    return {
+                        unit_id: document.getElementById('swal_unit').value
+                        , rate: document.getElementById('swal_rate').value
+                        , base: document.getElementById('swal_base').checked
+                    };
+                }
+            }).then((result) => {
+
+                if (result.isConfirmed) {
+
+                    let data = result.value;
+
+                    if (!data.unit_id) {
+                        Swal.fire('Error', 'Unit wajib dipilih', 'error');
+                        return;
+                    }
+
+                    saveItemUnit(itemId, data);
+                }
+            });
+        }
+
+        function saveItemUnit(itemId, data) {
+
+            Swal.fire({
+                title: 'Saving...'
+                , allowOutsideClick: false
+                , didOpen: () => Swal.showLoading()
+            });
+
+            fetch(`/inventory/items/${itemId}/unit`, {
+                    method: "POST"
+                    , headers: {
+                        "Content-Type": "application/json"
+                        , "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                    }
+                    , body: JSON.stringify(data)
+                })
+                .then(res => res.json())
+                .then(res => {
+
+                    Swal.close();
+
+                    if (res.success) {
+                        Swal.fire('Success', res.message, 'success')
+                            .then(() => location.reload());
+                    } else {
+                        Swal.fire('Error', res.message, 'error');
+                    }
+
+                })
+                .catch(err => {
+                    Swal.close();
+                    Swal.fire('Error', 'Server Error', 'error');
+                });
+        }
+
         function openEditModal(id, code, name, size, grade, weight, price) {
             document.getElementById('edit_code').value = code;
             document.getElementById('edit_name').value = name;

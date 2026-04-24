@@ -1,65 +1,44 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Production\Machine;
 
 use App\Http\Controllers\Controller;
+use App\Services\Production\Machine\MachineService;
 use Illuminate\Http\Request;
+
 
 class MachineController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    protected $service;
+
+    public function __construct(MachineService $service)
+    {
+        $this->service = $service;
+    }
+
     public function index()
     {
-        //
+        $machines = $this->service->getAll();
+ 
+
+        return view('production.machine.index', compact('machines'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $this->service->store($request->all());
+        return back()->with('success', 'Machine created');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function update(Request $request, $id)
     {
-        //
+        $this->service->update($id, $request->all());
+        return back()->with('success', 'Machine updated');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function destroy($id)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        $this->service->delete($id);
+        return back()->with('success', 'Machine deleted');
     }
 }

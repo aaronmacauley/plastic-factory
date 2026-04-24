@@ -2,9 +2,10 @@
 
 namespace App\Models\Inventory\ItemUnit;
 
+use App\Models\Inventory\Item\Item;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Support\Str;
 class ItemUnit extends Model
 {
     use HasFactory;
@@ -21,6 +22,7 @@ class ItemUnit extends Model
         'conversion_rate',
         'is_base_unit'
     ];
+
 
     protected static function boot()
     {
