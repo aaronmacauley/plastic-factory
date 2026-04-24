@@ -139,7 +139,7 @@
                     </a>
                 </li>
 
-                <!-- MASTER DATA -->
+                {{-- <!-- MASTER DATA -->
                 <li class="menu-title">Master Data</li>
 
                 <li>
@@ -162,10 +162,10 @@
                         <li><a href="/customers">Customer List</a></li>
                         <li><a href="/customers/create">Create Customer</a></li>
                     </ul>
-                </li>
+                </li> --}}
 
                 <!-- SETTINGS -->
-                <li class="menu-title">Settings</li>
+                {{-- <li class="menu-title">Settings</li>
 
                 <li>
                     <a href="#" class="has-arrow waves-effect">
@@ -187,7 +187,7 @@
                         <li><a href="/roles">Role List</a></li>
                         <li><a href="/roles/create">Create Role</a></li>
                     </ul>
-                </li>
+                </li> --}}
 
             </ul>
 
