@@ -250,6 +250,7 @@ function addOperationRow() {
             }
         });
     });
+
 </script>
 
 @endsection

@@ -19,6 +19,15 @@ class ProductionController extends Controller
         $productions = Productions::with('item')->latest()->get();
         return view('production.master.index', compact('productions'));
     }
+    public function planning($id)
+    {
+        $prod = Productions::with([
+            'materials.item',
+            'details.machine'
+        ])->findOrFail($id);
+
+        return response()->json($prod);
+    }
 
     // ================= CREATE =================
     public function create()
@@ -37,9 +46,12 @@ class ProductionController extends Controller
 
     public function store(Request $request)
     {
+
         $this->service->store($request->all());
 
-        return redirect()->back()->with('success', 'Production created');
+        return redirect()
+            ->route('production.index')
+            ->with('success', 'Production berhasil dibuat');
     }
     public function start($id)
     {

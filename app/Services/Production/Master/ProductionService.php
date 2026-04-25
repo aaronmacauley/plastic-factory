@@ -3,7 +3,7 @@
 namespace App\Services\Production\Master;
 
 use App\Models\Production\Bom\Bom;
-use App\Models\Production\Machine\ProductionDetails;
+use App\Models\Production\Detail\ProductionDetails;
 use App\Models\Production\Master\ProductionMaterial;
 use App\Models\Production\Master\Productions;
 use App\Services\Accounting\Journal\JournalService;
@@ -24,42 +24,84 @@ class ProductionService
     {
         return DB::transaction(function () use ($data) {
 
-            $bom = Bom::with(['details.item','operations.machine'])
+            $bom = Bom::with(['details.item', 'operations.machine'])
                 ->findOrFail($data['bom_id']);
 
+            $estimatedMaterial = 0;
+            $estimatedMachine = 0;
+
+            // 🔥 HITUNG ESTIMASI MATERIAL
+            foreach ($bom->details as $d) {
+                $estimatedMaterial += $d->qty * $data['qty'] * $d->item->standard_cost;
+            }
+
+            // 🔥 HITUNG ESTIMASI MACHINE
+            foreach ($bom->operations as $o) {
+                $estimatedMachine += ($o->hours * $data['qty']) * ($o->cost_per_hour ?? 0);
+
+            }
+
             $production = Productions::create([
-                'id' => Str::uuid(),
                 'production_date' => now(),
                 'item_id' => $data['item_id'],
                 'operator_name' => $data['operator_name'] ?? null,
-                'total_output' => $data['qty'] ?? 1
+                'total_output' => $data['qty'] ?? 1,
+
+                // ✅ SIMPAN ESTIMASI
+                'estimated_material_cost' => $estimatedMaterial,
+                'estimated_machine_cost' => $estimatedMachine,
+                'estimated_total_cost' => $estimatedMaterial + $estimatedMachine
             ]);
 
-            // 🔥 generate material & operation (draft)
+            // 🔥 DETAIL MATERIAL (ACTUAL nanti di finish)
+            // 🔥 DETAIL MATERIAL (PLANNED)
             foreach ($bom->details as $d) {
+
+                $qty = $d->qty * $data['qty'];
+                $unit = $d->item->units()
+                    ->wherePivot('unit_id', $d->unit_id)
+                    ->first();
+
+                $conversion = $unit->pivot->conversion_rate ?? 1;
+
+                $unitCost = $d->item->standard_cost * $conversion;
+
+                $total = $qty * $unitCost;
+
                 ProductionMaterial::create([
-                    'id' => Str::uuid(),
                     'production_id' => $production->id,
                     'item_id' => $d->item_id,
-                    'qty' => $d->qty * $data['qty'],
-                    'unit_cost' => $d->item->standard_cost,
-                    'cost' => 0 // belum dihitung
+                    'bom_id' => $bom->id,
+
+                    // ✅ PLANNED
+                    'planned_qty' => $qty,
+                    'planned_unit_cost' => $unitCost,
+                    'planned_total_cost' => $total,
+
+                    // ✅ ACTUAL kosong dulu
+                    'actual_qty' => null,
+                    'actual_unit_cost' => null,
+                    'actual_total_cost' => null,
                 ]);
             }
 
+            // 🔥 DETAIL MACHINE
             foreach ($bom->operations as $o) {
+
+                $hours = $o->hours * $data['qty']; // 🔥 penting!
+
                 ProductionDetails::create([
-                    'id' => Str::uuid(),
                     'production_id' => $production->id,
                     'machine_id' => $o->machine_id,
-                    'hours' => $o->hours,
-                    'cost' => 0 // belum dihitung
+                    'hours' => $hours,
+                    'cost' => $hours * ($o->cost_per_hour ?? 0), // ✅ isi juga
                 ]);
             }
 
             return $production;
         });
     }
+
 
     // ================= START =================
     public function start($id)
@@ -78,7 +120,7 @@ class ProductionService
     {
         return DB::transaction(function () use ($id) {
 
-            $prod = Productions::with(['materials.item','details.machine'])
+            $prod = Productions::with(['materials.item', 'details.machine'])
                 ->findOrFail($id);
 
             $totalMaterial = 0;

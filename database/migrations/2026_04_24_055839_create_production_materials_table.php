@@ -32,7 +32,7 @@ return new class extends Migration {
                 ->nullOnDelete();
 
             $table->decimal('qty', 15, 4);
-            $table->decimal('cost', 15, 2);
+            $table->decimal('planned_cost', 15, 2);
 
             $table->decimal('unit_cost', 15, 2)->default(0);
 

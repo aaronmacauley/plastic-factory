@@ -15,7 +15,6 @@ class JournalService
         return DB::transaction(function () use ($data) {
 
             $journal = Journal::create([
-                'id' => Str::uuid(),
                 'journal_number' => $this->generateNumber(),
                 'transaction_date' => $data['date'],
                 'description' => $data['description'],
@@ -25,8 +24,7 @@ class JournalService
             ]);
 
             foreach ($data['lines'] as $line) {
-                JournalDetails::create([
-                    'id' => Str::uuid(),
+                JournalDetails::create([ 
                     'journal_entry_id' => $journal->id,
                     'account_id' => $line['account_id'],
                     'position' => $line['position'],

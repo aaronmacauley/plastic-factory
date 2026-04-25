@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Production\Detail;
 
+use App\Models\Production\Machine\Machine;
+use App\Models\Production\Master\Productions;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-namespace App\Models\Production\Machine;
+
 use Illuminate\Support\Str;
 
-use Illuminate\Database\Eloquent\Model;
 class ProductionDetails extends Model
 {
     protected $table = 'production_details';
@@ -37,11 +38,12 @@ class ProductionDetails extends Model
 
     public function production()
     {
-        return $this->belongsTo(Production::class);
+        return $this->belongsTo(Productions::class);
     }
 
     public function machine()
     {
-        return $this->belongsTo(Machine::class);
+        return $this->belongsTo(Machine::class, 'machine_id');
     }
+
 }

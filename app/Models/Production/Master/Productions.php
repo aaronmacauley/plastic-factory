@@ -2,9 +2,13 @@
 
 namespace App\Models\Production\Master;
 
+use App\Models\Accounting\Journal\Journal;
+use App\Models\Inventory\Item\Item;
+use App\Models\Production\Detail\ProductionDetails;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use Illuminate\Support\Str;
 class Productions extends Model
 {
     protected $table = 'productions';
@@ -22,7 +26,12 @@ class Productions extends Model
         'total_output',
         'total_material_cost',
         'total_machine_cost',
-        'total_cost'
+        'total_cost',
+        // ✅ ESTIMATED
+        'estimated_material_cost',
+        'estimated_machine_cost',
+        'estimated_total_cost',
+
     ];
 
     protected static function boot()
@@ -36,20 +45,21 @@ class Productions extends Model
         });
     }
 
-    public function item()
+    public function materials()
     {
-        return $this->belongsTo(Item::class);
+        return $this->hasMany(ProductionMaterial::class, 'production_id');
     }
 
     public function details()
     {
-        return $this->hasMany(ProductionDetail::class);
+        return $this->hasMany(ProductionDetails::class, 'production_id');
     }
 
-    public function materials()
+    public function item()
     {
-        return $this->hasMany(ProductionMaterial::class);
+        return $this->belongsTo(Item::class, 'item_id');
     }
+
 
     public function journal()
     {

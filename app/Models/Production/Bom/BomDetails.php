@@ -41,6 +41,7 @@ class BomDetails extends Model
     // 🔗 ke Item (material / sub assembly)
     public function item()
     {
-        return $this->belongsTo(Item::class);
+        return $this->belongsTo(Item::class, 'item_id');
     }
+
 }

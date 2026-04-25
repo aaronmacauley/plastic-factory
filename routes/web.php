@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Accounting\Journal\JournalController;
 use App\Http\Controllers\Production\Master\ProductionController;
 use App\Http\Controllers\Accounting\Account\AccountController;
 use App\Http\Controllers\HomeController;
@@ -21,7 +22,11 @@ use App\Http\Controllers\Inventory\Unit\UnitController;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
+Route::prefix('journal')->name('journal.')->group(function () {
+    Route::get('/', [JournalController::class, 'index'])->name('index');
+    Route::get('/create', [JournalController::class, 'create'])->name('create');
+    Route::post('/', [JournalController::class, 'store'])->name('store');
+});
 Route::prefix('inventory/units')->name('units.')->group(function () {
     Route::get('/', [UnitController::class, 'index'])->name('index');
 
@@ -79,6 +84,7 @@ Route::prefix('bom')->name('bom.')->group(function () {
 Route::put('/production/bom/{id}', [BomController::class, 'update']);
 Route::get('/bom/{id}', [ProductionController::class, 'getBom']);
 Route::get('/production/get-bom-by-item/{id}', [ProductionController::class, 'getBomByItem']);
+Route::get('/production/{id}/planning', [ProductionController::class, 'planning']);
 
 Route::prefix('production')->name('production.')->group(function () {
 
