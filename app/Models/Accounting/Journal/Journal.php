@@ -4,7 +4,7 @@ namespace App\Models\Accounting\Journal;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Support\Str;
 class Journal extends Model
 {
     protected $table = 'journals';

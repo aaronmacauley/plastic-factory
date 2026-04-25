@@ -21,7 +21,18 @@ class AccountController extends Controller
 
         return view('accounting.accounts.index', compact('accounts'));
     }
+    public function getLedger(Request $request)
+    {
+        $ledger = $this->service->getLedger(
+            $request->account_id,
+            $request->from,
+            $request->to
+        );
 
+        $accounts = $this->service->getAccounts();
+
+        return view('accounting.report.general_ledger', compact('ledger', 'accounts'));
+    }
     public function store(Request $request)
     {
         $request->validate([

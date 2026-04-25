@@ -51,6 +51,7 @@ Accounts
                                         <th>Code</th>
                                         <th>Name</th>
                                         <th>Type</th>
+                                          <th>Normal Balance</th>
                                         <th width="180">Action</th>
                                     </tr>
                                 </thead>
@@ -73,7 +74,11 @@ Accounts
                                         </td>
 
                                         <td>
-                                            <button class="btn btn-warning btn-sm me-1" onclick="openEdit('{{ $acc->id }}','{{ $acc->code }}','{{ $acc->name }}','{{ $acc->type }}')">
+                                            {{ ucfirst($acc->normal_balance) }}
+                                        </td>
+
+                                        <td>
+                                            <button class="btn btn-warning btn-sm me-1" onclick="openEdit('{{ $acc->id }}','{{ $acc->code }}','{{ $acc->name }}','{{ $acc->type }}','{{ $acc->normal_balance }}')">
                                                 <i class="ti-pencil"></i>
                                             </button>
 
@@ -144,6 +149,13 @@ Accounts
                                 <option value="expense">Expense</option>
                             </select>
                         </div>
+                        <div class="mb-2">
+                            <label>Normal Balance</label>
+                            <select name="normal_balance" id="normal_balance" class="form-control" required>
+                                <option value="debit">Debit</option>
+                                <option value="credit">Credit</option>
+                            </select>
+                        </div>
 
                     </div>
 
@@ -181,14 +193,17 @@ Accounts
             document.getElementById('name').value = "";
             document.getElementById('type').value = "asset";
 
+            document.getElementById('normal_balance').value = "debit";
             new bootstrap.Modal(document.getElementById('accountModal')).show();
         }
 
-        function openEdit(id, code, name, type) {
+        function openEdit(id, code, name, type, normal_balance) {
             document.getElementById('accountForm').action = `/accounts/${id}`;
             document.getElementById('methodField').value = "PUT";
 
             document.getElementById('modalTitle').innerText = "Edit Account";
+            document.getElementById('normal_balance').value = normal_balance;
+
 
             document.getElementById('code').value = code;
             document.getElementById('name').value = name;

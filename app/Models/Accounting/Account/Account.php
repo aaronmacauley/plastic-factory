@@ -19,6 +19,7 @@ class Account extends Model
         'id',
         'code',
         'name',
+        'normal_balance',
         'type',
         'parent_id',
         'is_active'

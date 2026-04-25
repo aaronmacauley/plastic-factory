@@ -1,9 +1,10 @@
 <?php
 
 namespace App\Models\Accounting\Journal;
+use App\Models\Accounting\Account\Account;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Support\Str;
 class JournalDetails extends Model
 {
     protected $table = 'journal_entry_lines';

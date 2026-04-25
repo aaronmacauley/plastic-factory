@@ -18,21 +18,30 @@ class Productions extends Model
 
     protected $fillable = [
         'id',
+        'production_number',
+        'status',
         'production_date',
+        'started_at',
+        'finished_at',
+
         'item_id',
+        'planned_qty',
+
         'journal_id',
         'operator_name',
         'notes',
+
         'total_output',
-        'total_material_cost',
-        'total_machine_cost',
-        'total_cost',
-        // ✅ ESTIMATED
+
         'estimated_material_cost',
         'estimated_machine_cost',
         'estimated_total_cost',
 
+        'total_material_cost',
+        'total_machine_cost',
+        'total_cost',
     ];
+
 
     protected static function boot()
     {
@@ -41,6 +50,15 @@ class Productions extends Model
         static::creating(function ($model) {
             if (!$model->id) {
                 $model->id = (string) Str::uuid();
+            }
+            if (!$model->production_number) {
+
+                $date = now()->format('Y-m-d');
+
+                $countToday = self::whereDate('created_at', $date)->count() + 1;
+
+                $model->production_number =
+                    'PROD-' . $date . '-' . str_pad($countToday, 3, '0', STR_PAD_LEFT);
             }
         });
     }

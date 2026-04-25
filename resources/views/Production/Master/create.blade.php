@@ -106,7 +106,8 @@
 
     @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="{{URL::asset('assets/js/app.js')}}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+ 
     <script>
         let itemSelect = document.getElementById('itemSelect');
         let bomSelect = document.getElementById('bomSelect');
