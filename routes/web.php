@@ -109,7 +109,5 @@ Route::get('/', function () {
     return view('index');
 });
 
-Auth::routes();
 
-Route::get('{any}', [HomeController::class, 'index']);
 
