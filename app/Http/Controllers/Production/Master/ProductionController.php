@@ -59,11 +59,17 @@ class ProductionController extends Controller
         return back()->with('success', 'Production started');
     }
 
-    public function finish($id)
+    public function finish(Request $request)
     {
-        $this->service->finish($id);
+     
+        $id = $request->id;
+
+        $this->service->finish($id, $request->all());
+
         return back()->with('success', 'Production finished');
     }
+
+
     public function getBomByItem($itemId)
     {
         return response()->json(

@@ -4,7 +4,7 @@ namespace App\Models\Inventory\Stock\Master;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Support\Str;
 class Stock extends Model
 {
     use HasFactory;

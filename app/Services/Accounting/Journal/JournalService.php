@@ -16,7 +16,8 @@ class JournalService
 
             $journal = Journal::create([
                 'journal_number' => $this->generateNumber(),
-                'transaction_date' => $data['date'],
+                'transaction_date' => $data['transaction_date'],
+
                 'description' => $data['description'],
                 'reference_type' => $data['ref_type'] ?? null,
                 'reference_id' => $data['ref_id'] ?? null,
@@ -24,14 +25,19 @@ class JournalService
             ]);
 
             foreach ($data['lines'] as $line) {
-                JournalDetails::create([ 
+
+                $debit = $line['debit'] ?? 0;
+                $credit = $line['credit'] ?? 0;
+
+                JournalDetails::create([
                     'journal_entry_id' => $journal->id,
                     'account_id' => $line['account_id'],
-                    'position' => $line['position'],
-                    'amount' => $line['amount'],
-                    'description' => $line['description'] ?? null
+                    'description' => $line['description'] ?? null,
+                    'amount' => $debit > 0 ? $debit : $credit,
+                    'position' => $debit > 0 ? 'debit' : 'credit',
                 ]);
             }
+
 
             return $journal;
         });

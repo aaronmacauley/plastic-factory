@@ -127,13 +127,14 @@
                         <span>Journal</span>
                     </a>
                     <ul class="sub-menu">
-                        <li><a href="/journal-entries">Journal Entries</a></li>
-                        <li><a href="/journal-entries/create">Create Entry</a></li>
+                        <li><a href="{{ route('journal.index') }}">Journal Entries</a></li>
+                        <li><a href="{{ route('journal.create') }}">Create Entry</a></li>
                     </ul>
                 </li>
 
+
                 <li>
-                    <a href="/reports" class="waves-effect">
+                    <a href="{{ route('accounts.getLedger') }}" class="waves-effect">
                         <i class="ti-bar-chart"></i>
                         <span>Reports</span>
                     </a>

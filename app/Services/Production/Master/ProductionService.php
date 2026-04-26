@@ -2,6 +2,7 @@
 
 namespace App\Services\Production\Master;
 
+use App\Models\Accounting\Account\Account;
 use App\Models\Production\Bom\Bom;
 use App\Models\Production\Detail\ProductionDetails;
 use App\Models\Production\Master\ProductionMaterial;
@@ -109,88 +110,85 @@ class ProductionService
         $prod = Productions::findOrFail($id);
 
         $prod->update([
-            'status' => 1 // in progress
+            'status' => 1,
+            'started_at' => now(),
         ]);
-
-        return $prod;
     }
+
+
 
     // ================= FINISH =================
-    public function finish($id)
-    {
-        return DB::transaction(function () use ($id) {
+public function finish($id, $request)
+{
+    $prod = Productions::findOrFail($id);
 
-            $prod = Productions::with(['materials.item', 'details.machine'])
-                ->findOrFail($id);
+    $totalMaterial = 0;
 
-            $totalMaterial = 0;
-            $totalMachine = 0;
+    $wip = Account::where('code', '1410')->first();
+    $fg  = Account::where('code', '1420')->first();
 
-            // 🔥 HITUNG MATERIAL COST REAL
-            foreach ($prod->materials as $m) {
-
-                $cost = $m->qty * $m->unit_cost;
-
-                $m->update([
-                    'cost' => $cost
-                ]);
-
-                $totalMaterial += $cost;
-            }
-
-            // 🔥 HITUNG MACHINE COST REAL
-            foreach ($prod->details as $d) {
-
-                $machineCost = $d->machine->cost_per_hour ?? 0;
-                $cost = $d->hours * $machineCost;
-
-                $d->update([
-                    'cost' => $cost
-                ]);
-
-                $totalMachine += $cost;
-            }
-
-            $total = $totalMaterial + $totalMachine;
-
-            // 🔥 UPDATE PRODUCTION
-            $prod->update([
-                'total_material_cost' => $totalMaterial,
-                'total_machine_cost' => $totalMachine,
-                'total_cost' => $total,
-                'status' => 2 // finished
-            ]);
-
-            // 🔥 POST JOURNAL (BARU DI FINISH!)
-            $journal = $this->journalService->create([
-                'date' => now(),
-                'description' => 'Production Finish',
-                'ref_type' => 'production',
-                'ref_id' => $prod->id,
-                'lines' => [
-                    [
-                        'account_id' => 'WIP_ACCOUNT_ID',
-                        'position' => 'debit',
-                        'amount' => $total
-                    ],
-                    [
-                        'account_id' => 'RAW_MATERIAL_ACCOUNT_ID',
-                        'position' => 'credit',
-                        'amount' => $totalMaterial
-                    ],
-                    [
-                        'account_id' => 'MACHINE_COST_ACCOUNT_ID',
-                        'position' => 'credit',
-                        'amount' => $totalMachine
-                    ]
-                ]
-            ]);
-
-            $prod->update([
-                'journal_id' => $journal->id
-            ]);
-
-            return $prod;
-        });
+    if (!$wip || !$fg) {
+        throw new \Exception("Account 1410 / 1420 belum ada");
     }
+
+    foreach ($request['materials'] ?? [] as $m) {
+
+        $material = ProductionMaterial::where('id', $m['production_material_id'])->first();
+
+        if (!$material) {
+            continue; // 🔥 skip kalau ga ketemu
+        }
+
+        $actualQty = (float) ($m['actual_qty'] ?? 0);
+        $actualUnitCost = (float) ($m['actual_unit_cost'] ?? 0);
+
+        $plannedQty = (float) ($m['planned_qty'] ?? 0);
+        $plannedTotal = (float) ($m['planned_total_cost'] ?? 0);
+
+        $actualTotal = $actualQty * $actualUnitCost;
+
+        $material->update([
+            'actual_qty' => $actualQty,
+            'actual_unit_cost' => $actualUnitCost,
+            'actual_total_cost' => $actualTotal,
+            'variance_qty' => $actualQty - $plannedQty,
+            'variance_cost' => $actualTotal - $plannedTotal,
+        ]);
+
+        $totalMaterial += $actualTotal;
+    }
+
+    $prod->update([
+        'status' => 2,
+        'finished_at' => now(),
+        'total_material_cost' => $totalMaterial,
+        'total_cost' => $totalMaterial,
+    ]);
+
+    $this->journalService->create([
+        'transaction_date' => now(),
+        'description' => "Production Finish - {$prod->production_number}",
+        'ref_type' => 'production',
+        'ref_id' => $prod->id,
+        'lines' => [
+            [
+                'account_id' => $wip->id,
+                'debit' => $totalMaterial,
+                'credit' => 0,
+                'description' => 'WIP Production'
+            ],
+            [
+                'account_id' => $fg->id,
+                'debit' => $actualTotal,
+                'credit' => $totalMaterial,
+                'description' => 'Inventory Output'
+            ]
+        ]
+    ]);
+
+    return back()->with('success', 'Production finished');
+}
+
+
+
 }

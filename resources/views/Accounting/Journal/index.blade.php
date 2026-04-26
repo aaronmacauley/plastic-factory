@@ -9,10 +9,54 @@ Journal
 <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 
 <style>
-    .table td,
-    .table th {
-        vertical-align: middle;
-    }
+.table td, .table th {
+    vertical-align: middle;
+}
+
+.erp-card {
+    border: 0;
+    border-radius: 12px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.05);
+}
+
+.table thead {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    z-index: 2;
+}
+
+.loading-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+.badge-journal {
+    background: #1f2937;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.badge-journal:hover {
+    transform: scale(1.05);
+}
+
+.detail-row {
+    display: none;
+    background: #f9fafb;
+}
+
+.detail-box {
+    padding: 10px;
+    border-left: 3px solid #6366f1;
+}
 </style>
 @endsection
 
@@ -28,150 +72,143 @@ Journal
 @endcomponent
 
 <div class="row">
-    <div class="col-12">
-        <div class="card shadow-sm border-0">
-            <div class="card-body">
+<div class="col-12">
 
-                {{-- HEADER --}}
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="mb-0">📒 Journal Entries</h4>
+<div class="card erp-card">
+<div class="card-body position-relative">
 
-                    <button class="btn btn-primary" onclick="openCreate()">
-                        <i class="ti-plus"></i> Create Journal
-                    </button>
-                </div>
+    {{-- LOADING --}}
+    <div class="loading-overlay" id="loading">
+        Loading journal...
+    </div>
 
-                {{-- TABLE --}}
-                <div class="table-rep-plugin">
-                    <div class="table-responsive">
-                        <table class="table table-hover table-bordered align-middle text-center">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Journal No</th>
-                                    <th>Date</th>
-                                    <th>Description</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
+    {{-- HEADER --}}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-0">📒 Journal Entries</h4>
+            <small class="text-muted">Click journal number to view details</small>
+        </div>
 
-                            <tbody>
-                                @forelse($journals as $j)
-                                <tr>
-                                    <td>
-                                        <span class="badge bg-primary px-3 py-2">
-                                            {{ $j->journal_number }}
-                                        </span>
-                                    </td>
+        <button class="btn btn-primary" onclick="openCreate()">
+            <i class="ti-plus"></i> Create
+        </button>
+    </div>
 
-                                    <td>{{ $j->transaction_date }}</td>
-
-                                    <td class="text-start">
-                                        {{ $j->description }}
-                                    </td>
-
-                                    <td>
-                                        <span class="badge bg-success px-3 py-2">
-                                            {{ ucfirst($j->status) }}
-                                        </span>
-                                    </td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="4">
-                                        <div class="text-center py-4">
-                                            <h5 class="text-muted">No Data Found 😢</h5>
-                                        </div>
-                                    </td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-
-                        </table>
-                    </div>
-                </div>
-
-            </div>
+    {{-- FILTER --}}
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <input type="date" id="from_date" class="form-control">
+        </div>
+        <div class="col-md-3">
+            <input type="date" id="to_date" class="form-control">
+        </div>
+        <div class="col-md-4">
+            <input type="text" id="search" class="form-control" placeholder="Search journal / description">
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-outline-secondary w-100" onclick="resetFilter()">Reset</button>
         </div>
     </div>
+
+    {{-- TABLE --}}
+    <div class="table-rep-plugin">
+        <div class="table-responsive" style="max-height:500px; overflow:auto;">
+            <table class="table table-hover table-bordered align-middle text-center">
+
+                <thead>
+                    <tr>
+                        <th>Journal No</th>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                @forelse($journals as $j)
+
+                {{-- MAIN ROW --}}
+                <tr onclick="toggleDetail('{{ $j->id }}')" style="cursor:pointer;">
+                    <td>
+                        <span class="badge badge-journal px-3 py-2">
+                            {{ $j->journal_number }}
+                        </span>
+                    </td>
+
+                    <td>
+                        {{ \Carbon\Carbon::parse($j->transaction_date)->format('d M Y') }}
+                    </td>
+
+                    <td class="text-start">
+                        {{ $j->description }}
+                    </td>
+
+                    <td>
+                        <span class="badge bg-success px-3 py-2">
+                            {{ ucfirst($j->status) }}
+                        </span>
+                    </td>
+                </tr>
+
+                {{-- DETAIL ROW --}}
+                <tr id="detail-{{ $j->id }}" class="detail-row">
+                    <td colspan="4">
+                        <div class="detail-box text-start">
+
+                            <strong>Journal Lines</strong>
+                            <hr>
+
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Account</th>
+                                        <th>Position</th>
+                                        <th class="text-end">Amount</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    @foreach($j->lines as $line)
+                                    <tr>
+                                        <td>{{ $line->account->code ?? '-' }} - {{ $line->account->name ?? '-' }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ $line->position == 'debit' ? 'primary' : 'danger' }}">
+                                                {{ ucfirst($line->position) }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            Rp {{ number_format($line->amount,0,',','.') }}
+                                        </td>
+                                        <td>{{ $line->description }}</td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </td>
+                </tr>
+
+                @empty
+                <tr>
+                    <td colspan="4" class="py-5 text-muted">
+                        No Journal Found
+                    </td>
+                </tr>
+                @endforelse
+
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+
+</div>
 </div>
 
-{{-- MODAL --}}
-<div class="modal fade" id="journalModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-
-        <form id="journalForm" method="POST">
-            @csrf
-            <input type="hidden" id="methodField">
-
-            <div class="modal-content border-0 shadow">
-
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Journal</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-
-                <div class="modal-body">
-
-                    <div class="row">
-                        <div class="col-md-6 mb-2">
-                            <label>Date</label>
-                            <input type="date" name="transaction_date" id="transaction_date" class="form-control" required>
-                        </div>
-
-                        <div class="col-md-6 mb-2">
-                            <label>Description</label>
-                            <input type="text" name="description" id="description" class="form-control">
-                        </div>
-                    </div>
-
-                    <hr>
-
-                    <h6>Journal Lines</h6>
-
-                    <div class="row mb-2">
-                        <div class="col-md-4">
-                            <select name="lines[0][account_id]" class="form-control" required>
-                                <option value="">Select Account</option>
-                                @foreach($accounts as $acc)
-                                <option value="{{ $acc->id }}">
-                                    {{ $acc->code }} - {{ $acc->name }}
-                                </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="col-md-2">
-                            <select name="lines[0][position]" class="form-control">
-                                <option value="debit">Debit</option>
-                                <option value="credit">Credit</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-3">
-                            <input type="number" name="lines[0][amount]" class="form-control" placeholder="Amount">
-                        </div>
-
-                        <div class="col-md-3">
-                            <input type="text" name="lines[0][description]" class="form-control" placeholder="Desc">
-                        </div>
-                    </div>
-
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">
-                        Cancel
-                    </button>
-
-                    <button type="submit" class="btn btn-primary">
-                        Save
-                    </button>
-                </div>
-
-            </div>
-        </form>
-
-    </div>
+</div>
 </div>
 
 @endsection
@@ -179,30 +216,51 @@ Journal
 
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="{{URL::asset('assets/js/app.js')}}"></script>
-
+<script src="{{ asset('assets/js/app.js') }}"></script>
 <script>
-    function openCreate() {
-        document.getElementById('journalForm').action = "{{ route('journal.store') }}";
-        document.getElementById('methodField').value = "";
 
-        document.getElementById('modalTitle').innerText = "Create Journal";
+/* LOADING */
+document.addEventListener("DOMContentLoaded", function () {
+    let loader = document.getElementById('loading');
+    loader.style.display = "flex";
+    setTimeout(() => loader.style.display = "none", 500);
+});
 
-        document.getElementById('transaction_date').value = "";
-        document.getElementById('description').value = "";
-
-        new bootstrap.Modal(document.getElementById('journalModal')).show();
+/* TOGGLE DETAIL */
+function toggleDetail(id) {
+    let el = document.getElementById('detail-' + id);
+    if (el.style.display === 'table-row') {
+        el.style.display = 'none';
+    } else {
+        el.style.display = 'table-row';
     }
+}
 
-    @if(session('success'))
-    Swal.fire({
-        icon: 'success',
-        title: 'Success',
-        text: @json(session('success')),
-        timer: 2000,
-        showConfirmButton: false
+/* FILTER SIMPLE */
+document.getElementById('search').addEventListener('keyup', filterTable);
+document.getElementById('from_date').addEventListener('change', filterTable);
+document.getElementById('to_date').addEventListener('change', filterTable);
+
+function filterTable() {
+    let search = document.getElementById('search').value.toLowerCase();
+
+    document.querySelectorAll('tbody tr').forEach(row => {
+        row.style.display = row.innerText.toLowerCase().includes(search) ? '' : 'none';
     });
-    @endif
-</script>
+}
 
+/* RESET */
+function resetFilter() {
+    document.getElementById('search').value = '';
+    document.getElementById('from_date').value = '';
+    document.getElementById('to_date').value = '';
+    filterTable();
+}
+
+/* CREATE */
+function openCreate() {
+    window.location.href = "{{ route('journal.create') }}";
+}
+
+</script>
 @endsection

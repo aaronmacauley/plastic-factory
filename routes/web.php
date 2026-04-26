@@ -22,6 +22,10 @@ use App\Http\Controllers\Inventory\Unit\UnitController;
 | contains the "web" middleware group. Now create something great!
 |
 */
+Route::post('production/finish', [ProductionController::class, 'finish'])
+    ->name('production.finish');
+
+
 Route::prefix('journal')->name('journal.')->group(function () {
     Route::get('/', [JournalController::class, 'index'])->name('index');
     Route::get('/create', [JournalController::class, 'create'])->name('create');
@@ -49,6 +53,7 @@ Route::prefix('inventory/items')->name('items.')->group(function () {
 
 Route::prefix('accounts')->name('accounts.')->group(function () {
     Route::get('/', [AccountController::class, 'index'])->name('index');
+    Route::get('/getLedger', [AccountController::class, 'getLedger'])->name('getLedger');
     Route::post('/', [AccountController::class, 'store'])->name('store');
     Route::put('/{id}', [AccountController::class, 'update'])->name('update');
     Route::delete('/{id}', [AccountController::class, 'destroy'])->name('destroy');
@@ -83,31 +88,24 @@ Route::prefix('bom')->name('bom.')->group(function () {
 });
 Route::put('/production/bom/{id}', [BomController::class, 'update']);
 Route::get('/bom/{id}', [ProductionController::class, 'getBom']);
-Route::get('/production/get-bom-by-item/{id}', [ProductionController::class, 'getBomByItem']);
-Route::get('/production/{id}/planning', [ProductionController::class, 'planning']);
 
 Route::prefix('production')->name('production.')->group(function () {
+Route::get('/bom/{id}', [ProductionController::class, 'getBom']);
 
     Route::get('/', [ProductionController::class, 'index'])->name('index');
-
-    // ================= PRODUCTION =================
     Route::get('/create', [ProductionController::class, 'create'])->name('create');
     Route::post('/store', [ProductionController::class, 'store'])->name('store');
 
-    Route::get('/bom/{id}', [ProductionController::class, 'getBom']); // API
-
     Route::post('/{id}/start', [ProductionController::class, 'start'])->name('start');
-    Route::post('/{id}/finish', [ProductionController::class, 'finish'])->name('finish');
 
 
-
-
+    Route::get('/{id}/planning', [ProductionController::class, 'planning']);
+    Route::get('/get-bom-by-item/{id}', [ProductionController::class, 'getBomByItem']);
 });
+
 
 
 Route::get('/', function () {
     return view('index');
 });
-
-
 

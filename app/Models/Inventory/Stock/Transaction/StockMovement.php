@@ -4,7 +4,7 @@ namespace App\Models\Inventory\Stock\Transaction;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Support\Str;
 class StockMovement extends Model
 {
     protected $table = 'stock_movements';
