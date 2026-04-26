@@ -387,7 +387,4 @@
         </script>
 
 
-
-    <script src="{{URL::asset('assets/js/app.js')}}"></script>
-
     @endsection

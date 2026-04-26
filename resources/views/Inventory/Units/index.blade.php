@@ -270,7 +270,7 @@ Units
     <script src="{{URL::asset('assets/libs/admin-resources/rwd-table/rwd-table.min.js')}}"></script>
     <script src="{{URL::asset('assets/js/pages/table-responsive.init.js')}}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="{{URL::asset('assets/js/app.js')}}"></script>
+ 
 
     <script>
         function deleteUnit(id) {

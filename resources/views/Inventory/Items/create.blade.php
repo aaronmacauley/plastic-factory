@@ -166,7 +166,7 @@ Create Item
 
     @section('scripts')
 
-    <script src="{{URL::asset('assets/js/app.js')}}"></script>
+ 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
